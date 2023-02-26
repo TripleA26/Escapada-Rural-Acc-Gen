@@ -9,7 +9,7 @@ A fork on https://github.com/TripleA26/Escapada-Rural-Acc-Gen
     * Enter amount of threads
     * Choose whether to use proxies (y/n) 
 ```
-![Screenshot](accounts.png)
+![Screenshot](preview.png)
 
 Educational purposes only to demonstrate why your site should use captcha.
 https://www.escapadarural.com/ Improve the security of your site. A captcha or anything will do :/
