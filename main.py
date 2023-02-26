@@ -8,7 +8,7 @@ def send():
         proxies = {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
         name = "".join(random.choices(string.ascii_letters, k=7))
         surname = "".join(random.choices(string.ascii_letters, k=7))
-        email = "".join(random.choices(string.ascii_letters + string.digits, k=7)) + "@gmail.com"
+        email = "".join(random.choices(string.ascii_letters + string.digits, k=10)) + "@gmail.com"
         password = "".join(random.choices(string.ascii_letters + string.digits , k=12))
         headers = {
             'authority': 'www.escapadarural.com',
