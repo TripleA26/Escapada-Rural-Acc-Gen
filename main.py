@@ -1,42 +1,74 @@
-import requests, random, threading, string, time
-from colorama import Fore
-x = 1
-def send():
-    global x
-    try:
-        proxy = random.choice(open('proxies.txt', 'r').read().splitlines())
-        proxies = {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
-        name = "".join(random.choices(string.ascii_letters, k=7))
-        surname = "".join(random.choices(string.ascii_letters, k=7))
-        email = "".join(random.choices(string.ascii_letters + string.digits, k=10)) + "@gmail.com"
-        password = "".join(random.choices(string.ascii_letters + string.digits , k=12))
-        headers = {
-            'authority': 'www.escapadarural.com',
-            'accept': '*/*',
-            'accept-language': 'es-ES,es;q=0.9',
-            'cache-control': 'no-cache',
-            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'origin': 'https://www.escapadarural.com',
-            'referer': 'https://www.escapadarural.com',
-            'sec-ch-ua': '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest',
-        }
+from string   import *
+from random   import *
+import threading
+from requests import *
+from colorama import *
 
-        data = f'traveler%5Buser_name%5D={name}&traveler%5Buser_surname%5D={surname}&traveler%5Buser_email%5D={email}&traveler%5Buser_password%5D={password}&traveler%5Buser_type%5D=traveler&traveler%5Bconditions%5D=1&traveler%5Ballow_comms%5D=1&popUpLog=1&undefined'
 
-        response = requests.post('https://www.escapadarural.com/dynamic/popup/login/signUp', headers=headers, proxies=proxies, data=data)
-        with open("accounts.txt", "a+") as f:
-            f.write(f"{email}:{password}:{name}:{surname}\n")
-        print(f"{Fore.LIGHTGREEN_EX}Account Created: {email}:{password}:{name}:{surname}  | {x}{Fore.RESET}")
-        x += 1
-    except:
-        print(Fore.LIGHTRED_EX + "Error Creating the Account" + Fore.RESET)
-y = 1
-while True:
-    if y % 300 == 0:
-        print(Fore.LIGHTYELLOW_EX + "Waiting so ur not ratelimited ^^")
-        time.sleep(15)
-    else:
-        threading.Thread(target=send).start()
-    y += 1
+class Escapada:
+    def __init__(self) -> None:
+        self.session = Session()
+    created = 0
+    errors  = 0
+
+    def __gen__(self, use):
+        try:
+            with self.session as session:
+                name     = ''.join(choices(ascii_letters, k=7))
+                email    = ''.join(choices(ascii_letters + digits, k=10)) + "@gmail.com"
+                surname  = ''.join(choices(ascii_letters, k=7))
+                password = ''.join(choices(ascii_letters + digits , k=12))
+
+                headers = {
+                    'authority'         : 'www.escapadarural.com',
+                    'accept'            : '*/*',
+                    'accept-language'   : 'en-GB,en-US;q=0.9,en;q=0.8',
+                    'content-type'      : 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'origin'            : 'https://www.escapadarural.com',
+                    'referer'           : 'https://www.escapadarural.com/',
+                    'sec-ch-ua'         : '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+                    'sec-ch-ua-mobile'  : '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest'    : 'empty',
+                    'sec-fetch-mode'    : 'cors',
+                    'sec-fetch-site'    : 'same-origin',
+                    'user-agent'        : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                    'x-requested-with'  : 'XMLHttpRequest',
+                }
+                parms = {
+                    'traveler[user_name]'    : name,
+                    'traveler[user_email]'   : email,
+                    'traveler[user_surname]' : surname,
+                    'traveler[user_password]': password,
+                    'traveler[user_type]'    : 'traveler',
+                    'traveler[conditions]'   : '1',
+                    'popUpLog'               : 'undefined'
+                    }
+                if use == True:
+                    proxy = choice(open('data/proxies.txt', 'r').read().splitlines())
+                    response = session.post('https://www.escapadarural.com/dynamic/popup/login/signUp', params=parms, headers=headers, proxies={'http': f'http://{proxy}', 'https': f'http://{proxy}'})
+                else:
+                    response = session.post('https://www.escapadarural.com/dynamic/popup/login/signUp', params=parms, headers=headers)
+                if response.status_code == 200:
+                    Escapada.created += 1
+                    print(f"{Fore.BLUE}[ {Fore.GREEN}+ {Fore.BLUE}]{Fore.RESET} Generated Acccount ({Escapada.created})")
+                    with open('data/accounts.txt', 'a') as f:
+                        f.write(f'{email}:{password}:{name}:{surname}\n')
+                else:
+                    Escapada.errors += 1
+                    print(f"{Fore.BLUE}[ {Fore.RED}x {Fore.BLUE}]{Fore.RESET} Unknown Error ({self.errors})")
+        except Exception as e:
+            pass
+
+
+
+threads = int(input(f"{Fore.BLUE}[ {Fore.YELLOW}> {Fore.BLUE}]{Fore.RESET} Threads > "))
+usePR   = input(f"{Fore.BLUE}[ {Fore.YELLOW}> {Fore.BLUE}]{Fore.RESET} Use Proxies (y/n) > ")
+if usePR == 'y':
+    use = True
+else:
+    use = False
+for i in range(threads):
+    threading.Thread(target=Escapada().__gen__, args=(use,)).start()
+
+#print(f"{Fore.BLUE}[ {Fore.YELLOW}+ {Fore.BLUE}]{Fore.RESET} Finished with {Escapada.created}/{threads}, {Escapada.errors} Errors ")
