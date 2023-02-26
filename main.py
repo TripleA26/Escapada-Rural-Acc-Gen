@@ -11,7 +11,7 @@ class Escapada:
     created = 0
     errors  = 0
 
-    def __gen__(self, use):
+    def __gen__(self, use) -> None:
         try:
             with self.session as session:
                 name     = ''.join(choices(ascii_letters, k=7))
